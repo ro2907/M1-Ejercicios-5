@@ -1,7 +1,6 @@
 <p align='left'>
     <img  src='./logo.png' height='200px'>
 </p>
-
 # Lección 5: Javascript V (Clases y `prototype`)
 
 En esta lección cubriremos:
@@ -60,10 +59,10 @@ Usuario.prototype.introduccion = function () {
 };
 
 let juan = new Usuario('Juan', 'juan.perez');
-let antonio = new Usuario('Misael', 'pmpeloc');
+let antonio = new Usuario('Antonio', 'atralice');
 
 console.log(juan.introduccion()); // Mi nombre es Juan, mi usuario de Github es juan.perez.
-console.log(riley.introduccion()); // Mi nombre es Misael, mi usuario de Github es pmpeloc.
+console.log(riley.introduccion()); // Mi nombre es Antonio, mi usuario de Github es atralice.
 ```
 
 Los métodos de `prototype` tienen acceso a la palabra clave `this` y, al igual que antes, siempre apuntará al objeto (a la izquierda del punto) que lo está llamando.
@@ -95,10 +94,10 @@ El método `assign` de los objetos te permite agregar propiedades a un objeto pa
 > var obj = {}
 
 // No hace falta guardar el resultado porque los objetos se pasan por `referencia`
-> Object.assign(obj, {nombre:'Juan', apellido:'Perez'})
+> Object.assign(obj, {nombre:'facu', apellido:'velasco'})
 
 > obj.nombre
-< 'Juan'
+< 'facu'
 ```
 
 ## Herencia Clásica
@@ -128,10 +127,10 @@ Nosotros también podemos generar nuestros propios constructores que de los cual
     console.log('Soy '+this.nombre+' de '+this.ciudad);
   }
 
-> var Juan = new Persona('Juan', 'Perez', 'Buenos Aires');
+> var facu = new Persona('Facundo', 'Velasco', 'Buenos Aires');
 
-> Juan.saludar()
-< 'Soy Juan de Buenos Aires'
+> facu.saludar()
+< 'Soy Facundo de Buenos Aires'
 ```
 
 Ahora todo Alumno de Upgrade antes de Alumno es una Persona, asique podríamos decir que un Alumno hereda las propiedades de ser Persona.
@@ -161,26 +160,28 @@ Descartemos esta opción.
 
     // finalmente le agrego los puntos propios de Alumno
     this.curso = curso;
-    this.empresa = 'Upgrade';
+    this.instituto = 'P5';
   }
 
-> var juan = new Alumno('Juan', 'Perez', 'Salta', 'Web Full Stack')
+> var toni = new Alumno('Toni', 'Tralice', 'Tucuman', 'Bootcamp')
 
 // Ahora si tenemos nuestra instancia creada a partir de ambos constructores
-> juan.curso
-< Web Full Stack
+> toni.curso
+< Bootcamp
 
-> juan.apellido
-< Perez
+> toni.apellido
+< Tralice
 
-> juan.saludar()
-< Uncaught TypeError: juan.saludar is not a 'function'
+> toni.saludar()
+< Uncaught TypeError: toni.saludar is not a 'function'
 // que paso?
 ```
 
 Como podemos ver los métodos de _Personas_ no fueron pasados a nuestros _Alumnos_. Veamos un poco el porqué.
 
-El constructor del `__proto__` esta ligado a Alumno y luego al `Object Object` de JS. Pero el método `saludar` esta en el objeto `prototype` de Personas... , y esta perfecto, así es como debería funcionar, las instancias acceden al `__proto__` que fue vinculado por el constructor para ver que métodos tienen. Nuestro problema es que al llamar a Persona con `call` en vez de con el método `new` no se esta haciendo ese vinculo en el que `Persona.prototype` se mete en nuestro `Prototype Chain`, y entonces las instancias de Alumno no tienen acceso a los métodos de Persona
+![Alumno proto](./01-JavaScript-5/img/AlumnoProto.png)
+
+Como podemos ver en la imagen, el constructor del `__proto__` esta ligado a Alumno y luego al `Object Object` de JS. Pero el método `saludar` esta en el objeto `prototype` de Personas... , y esta perfecto, así es como debería funcionar, las instancias acceden al `__proto__` que fue vinculado por el constructor para ver que métodos tienen. Nuestro problema es que al llamar a Persona con `call` en vez de con el método `new` no se esta haciendo ese vinculo en el que `Persona.prototype` se mete en nuestro `Prototype Chain`, y entonces las instancias de Alumno no tienen acceso a los métodos de Persona
 
 Vamos a solucionar ese problema agregando al prototipo los métodos de Persona, para esto vamos a usar el método `Object.create`.
 
@@ -191,10 +192,44 @@ Vamos a solucionar ese problema agregando al prototipo los métodos de Persona, 
 // si recuerdan el objeto prototype siempre tenia una propiedad constructor que hacia referencia a la función en si, con la asignación que hicimos arriba lo pisamos, por lo que deberíamos volver a agregarlo.
 > Alumno.prototype.constructor = Alumno
 
-> var Franco = new Alumno('Franco','Etcheverri','Montevideo','Bootcamp')
+> var guille = new Alumno('Guille','Aszyn','Montevideo','Bootcamp')
 
-> Franco.saludar()
-< 'Soy Franco de Montevideo'
+> guille.saludar()
+< 'Soy Guille de Montevideo'
+```
+
+Ahora tenemos una instancia que puede usar los métodos del otro constructor sin necesidad de volverlos a escribir para ella misma.
+
+![prototype chain](./01-JavaScript-5/img/protochain.png)
+
+Para completar nuestro ejemplo creemos un método que solo pueda acceder un Alumno.
+
+```javascript
+> Alumno.prototype.inscribirme = function (curso) {
+    cursosArr = ['Bootcamp','Introductorio','Backend']
+    // si el curso esta entre alguno de los ofrecidos
+    if (cursosArr.includes(curso)) {
+      this.curso = curso;
+    } else {
+      console.log('No tenemos ese curso :(')
+    }
+  }
+
+> guille.curso
+< 'Bootcamp'
+
+> guille.inscribirme('Introductorio')
+
+> guille.curso
+< 'Introductorio'
+
+// y ahora probemoslo para alguien que no sea alumno
+
+> var facu = new Persona('Facundo', 'Velasco', 'Buenos Aires')
+
+> facu.inscribirse('Backend');
+< Uncaught TypeError: facu.inscribirse is not a 'function'
+  // Excelente!
 ```
 
 ## Abre la carpeta "ejercicios" y completa la tarea descrita en el archivo README
